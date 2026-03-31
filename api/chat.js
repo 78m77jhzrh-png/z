@@ -9,8 +9,8 @@ export default async function handler(req, res) {
     const { prompt } = req.body;
     const API_KEY = process.env.examen?.trim();
 
-    // URL LIMPIA SIN CORCHETES NI ENLACES
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
+    // URL PERFECTAMENTE LIMPIA PARA GEMINI 3
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${API_KEY}`;
 
     const response = await fetch(url, {
       method: 'POST',
