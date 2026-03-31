@@ -42,30 +42,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             
-            // 1. Verificamos si Google devolvió un error de API
-            if (data.error) {
-                typingMsg.innerText = "Error de Google: " + data.error.message;
-                return;
-            }
-
-            // 2. Verificamos si la respuesta tiene el formato correcto
-            if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+            if (data.candidates && data.candidates[0].content.parts[0].text) {
                 typingMsg.innerText = data.candidates[0].content.parts[0].text;
             } else {
-                console.log("Respuesta inesperada:", data);
-                typingMsg.innerText = "Draco no pudo procesar la respuesta. Revisa la consola (F12).";
+                typingMsg.innerText = "Draco no recibió respuesta. Revisa tu clave en Netlify.";
             }
 
         } catch (error) {
             typingMsg.innerText = "Error: El túnel secreto falló.";
             console.error(error);
-        } finally {
-            sendBtn.disabled = false;
         }
     };
 
     sendBtn.onclick = sendMessage;
 
+    // Enviar con Enter
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
