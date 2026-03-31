@@ -34,23 +34,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const typingMsg = addMessage("Draco está pensando...", 'bot');
 
         try {
-            // Llamamos a la función de Netlify
-            const response = await fetch('/.netlify/functions/chat', {
+            // CAMBIO CLAVE: Ahora usamos la ruta de Vercel
+            const response = await fetch('/api/chat', {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ prompt: text })
             });
 
             const data = await response.json();
             
-            if (data.candidates && data.candidates[0].content.parts[0].text) {
+            // Verificamos si hay respuesta de la IA
+            if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
                 typingMsg.innerText = data.candidates[0].content.parts[0].text;
+            } else if (data.error) {
+                typingMsg.innerText = "Error de Google: " + data.error.message;
             } else {
-                typingMsg.innerText = "Draco no recibió respuesta. Revisa tu clave en Netlify.";
+                typingMsg.innerText = "Draco recibió una respuesta vacía. Revisa la consola.";
+                console.log("Datos recibidos:", data);
             }
 
         } catch (error) {
-            typingMsg.innerText = "Error: El túnel secreto falló.";
+            typingMsg.innerText = "Error: El túnel hacia Vercel falló.";
             console.error(error);
+        } finally {
+            // Reactivamos el botón pase lo que pase
+            sendBtn.disabled = false;
         }
     };
 
