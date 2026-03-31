@@ -33,7 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const typingMsg = addMessage("Draco está pensando...", 'bot');
 
-      try {
+        try {
+            // Llamada al túnel de Vercel
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -42,37 +43,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             
-            // 1. Verificamos si la respuesta es exitosa (Trae candidates)
+            // 1. Si Google responde con éxito
             if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
                 typingMsg.innerText = data.candidates[0].content.parts[0].text;
             } 
-            // 2. Si hay un error, intentamos leerlo de varias formas para evitar el "undefined"
+            // 2. Si hay un error (usamos el sistema "anti-undefined")
             else {
-                const errorTexto = data.error?.message || data.error || data.detalle || "Error desconocido";
+                const errorTexto = data.error?.message || data.error || data.detalle || "Respuesta vacía de Draco";
                 typingMsg.innerText = "Nota de Draco: " + errorTexto;
                 console.error("Detalle del error:", data);
             }
 
         } catch (error) {
             typingMsg.innerText = "Error: El túnel hacia Vercel falló.";
-            console.error(error);
-        }
-
-            const data = await response.json();
-            
-            // Verificamos si hay respuesta de la IA
-            if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
-                typingMsg.innerText = data.candidates[0].content.parts[0].text;
-            } else if (data.error) {
-                typingMsg.innerText = "Error de Google: " + data.error.message;
-            } else {
-                typingMsg.innerText = "Draco recibió una respuesta vacía. Revisa la consola.";
-                console.log("Datos recibidos:", data);
-            }
-
-        } catch (error) {
-            typingMsg.innerText = "Error: El túnel hacia Vercel falló.";
-            console.error(error);
+            console.error("Error de conexión:", error);
         } finally {
             // Reactivamos el botón pase lo que pase
             sendBtn.disabled = false;
