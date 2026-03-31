@@ -7,8 +7,8 @@ export default async function handler(req, res) {
     const { prompt } = req.body;
     const API_KEY = process.env.examen;
 
-    // USAMOS EL MODELO GEMINI-PRO (EL MÁS ESTABLE Y COMPATIBLE)
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`, {
+    // ESTA ES LA URL QUE GOOGLE PIDE AHORA: VERSIÓN V1 Y MODELO FLASH
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -18,11 +18,11 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     
-    // Verificamos si la respuesta tiene el formato correcto
+    // Si Google responde con éxito
     if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
         return res.status(200).json(data);
     } else {
-        // Si hay un error de Google, lo mostramos para saber qué pasa
+        // Si hay error, lo devolvemos para ver qué dice ahora
         return res.status(400).json(data);
     }
 
