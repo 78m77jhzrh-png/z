@@ -9,33 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
         input.style.height = 'auto';
         input.style.height = input.scrollHeight + 'px';
     });
-try {
-            const response = await fetch('/.netlify/functions/chat', {
-                method: 'POST',
-                body: JSON.stringify({ prompt: text })
-            });
 
-            const data = await response.json();
-            
-            // Verificamos si Google devolvió un error (como clave inválida)
-            if (data.error) {
-                typingMsg.innerText = "Error de Google: " + data.error.message;
-                return;
-            }
+    const addMessage = (text, type) => {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `msg ${type}`;
+        msgDiv.innerText = text;
+        chatFlow.appendChild(msgDiv);
+        chatFlow.scrollTop = chatFlow.scrollHeight;
+        return msgDiv;
+    };
 
-            // Verificamos si hay respuesta de Draco
-            if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-                typingMsg.innerText = data.candidates[0].content.parts[0].text;
-            } else {
-                // Si llegamos aquí, imprimimos el error en la consola para investigar
-                console.log("Datos recibidos extraños:", data);
-                typingMsg.innerText = "Draco recibió algo raro de Google. Mira la consola (F12).";
-            }
-
-        } catch (error) {
-            typingMsg.innerText = "Error: El túnel secreto falló.";
-            console.error(error);
-        }
     const sendMessage = async () => {
         const text = input.value.trim();
         if (!text) return;
@@ -59,21 +42,30 @@ try {
 
             const data = await response.json();
             
-            if (data.candidates && data.candidates[0].content.parts[0].text) {
+            // 1. Verificamos si Google devolvió un error de API
+            if (data.error) {
+                typingMsg.innerText = "Error de Google: " + data.error.message;
+                return;
+            }
+
+            // 2. Verificamos si la respuesta tiene el formato correcto
+            if (data.candidates && data.candidates[0] && data.candidates[0].content) {
                 typingMsg.innerText = data.candidates[0].content.parts[0].text;
             } else {
-                typingMsg.innerText = "Draco no recibió respuesta. Revisa tu clave en Netlify.";
+                console.log("Respuesta inesperada:", data);
+                typingMsg.innerText = "Draco no pudo procesar la respuesta. Revisa la consola (F12).";
             }
 
         } catch (error) {
             typingMsg.innerText = "Error: El túnel secreto falló.";
             console.error(error);
+        } finally {
+            sendBtn.disabled = false;
         }
     };
 
     sendBtn.onclick = sendMessage;
 
-    // Enviar con Enter
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
