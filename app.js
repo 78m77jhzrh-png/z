@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendBtn = document.getElementById('send-btn');
     const chatFlow = document.getElementById('chat-flow');
 
-    // Ajustar altura del input automáticamente
     input.addEventListener('input', () => {
         sendBtn.disabled = !input.value.trim();
         input.style.height = 'auto';
@@ -23,9 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = input.value.trim();
         if (!text) return;
 
-        // Quitar mensaje de bienvenida si existe
         document.getElementById('welcome')?.remove();
-
         addMessage(text, 'user');
         input.value = '';
         input.style.height = 'auto';
@@ -34,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const typingMsg = addMessage("Draco está pensando...", 'bot');
 
         try {
-            // Llamada al túnel de Vercel
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -43,29 +39,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             
-            // 1. Si Google responde con éxito
             if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
                 typingMsg.innerText = data.candidates[0].content.parts[0].text;
-            } 
-            // 2. Si hay un error (usamos el sistema "anti-undefined")
-            else {
-                const errorTexto = data.error?.message || data.error || data.detalle || "Respuesta vacía de Draco";
-                typingMsg.innerText = "Nota de Draco: " + errorTexto;
-                console.error("Detalle del error:", data);
+            } else {
+                // Si llegamos aquí, mostramos el error real que viene de Google
+                const errorMsg = data.error?.message || "Error desconocido en la API";
+                typingMsg.innerText = "Draco dice: " + errorMsg;
             }
 
         } catch (error) {
             typingMsg.innerText = "Error: El túnel hacia Vercel falló.";
-            console.error("Error de conexión:", error);
+            console.error(error);
         } finally {
-            // Reactivamos el botón pase lo que pase
             sendBtn.disabled = false;
         }
     };
 
     sendBtn.onclick = sendMessage;
-
-    // Enviar con Enter
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
