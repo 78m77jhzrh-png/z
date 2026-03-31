@@ -1,0 +1,8 @@
+{
+  "name": "draco-chat",
+  "version": "1.0.0",
+  "description": "Chat con IA de Draco",
+  "main": "app.js",
+  "dependencies": {},
+  "devDependencies": {}
+}
