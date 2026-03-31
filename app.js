@@ -9,16 +9,33 @@ document.addEventListener('DOMContentLoaded', () => {
         input.style.height = 'auto';
         input.style.height = input.scrollHeight + 'px';
     });
+try {
+            const response = await fetch('/.netlify/functions/chat', {
+                method: 'POST',
+                body: JSON.stringify({ prompt: text })
+            });
 
-    const addMessage = (text, type) => {
-        const msgDiv = document.createElement('div');
-        msgDiv.className = `msg ${type}`;
-        msgDiv.innerText = text;
-        chatFlow.appendChild(msgDiv);
-        chatFlow.scrollTop = chatFlow.scrollHeight;
-        return msgDiv;
-    };
+            const data = await response.json();
+            
+            // Verificamos si Google devolvió un error (como clave inválida)
+            if (data.error) {
+                typingMsg.innerText = "Error de Google: " + data.error.message;
+                return;
+            }
 
+            // Verificamos si hay respuesta de Draco
+            if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                typingMsg.innerText = data.candidates[0].content.parts[0].text;
+            } else {
+                // Si llegamos aquí, imprimimos el error en la consola para investigar
+                console.log("Datos recibidos extraños:", data);
+                typingMsg.innerText = "Draco recibió algo raro de Google. Mira la consola (F12).";
+            }
+
+        } catch (error) {
+            typingMsg.innerText = "Error: El túnel secreto falló.";
+            console.error(error);
+        }
     const sendMessage = async () => {
         const text = input.value.trim();
         if (!text) return;
