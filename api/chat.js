@@ -7,8 +7,8 @@ export default async function handler(req, res) {
     const { prompt } = req.body;
     const API_KEY = process.env.examen;
 
-    // HEMOS ACTUALIZADO LA URL A LA VERSIÓN ESTABLE v1
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+    // USAMOS EL MODELO CON EL NOMBRE "LATEST" Y LA VERSIÓN V1BETA QUE ES MÁS FLEXIBLE
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -18,12 +18,13 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     
-    // Si Google devuelve un error, lo enviamos para saber qué es
-    if (data.error) {
-      return res.status(data.error.code || 400).json(data);
+    // Si la respuesta de Google tiene éxito
+    if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+        return res.status(200).json(data);
+    } else {
+        // Si hay un error específico de Google, lo devolvemos para leerlo
+        return res.status(400).json(data);
     }
-
-    return res.status(200).json(data);
 
   } catch (error) {
     return res.status(500).json({ error: error.message });
