@@ -10,8 +10,7 @@ export default async function handler(req, res) {
     const API_KEY = process.env.examen?.trim();
 
     // USAMOS EL MODELO QUE DICE TU DOCUMENTACIÓN: gemini-3-flash-preview
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${API_KEY}`, {
-      method: 'POST',
+const response = await fetch('[https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=$](https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=$){API_KEY}', {      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }]
