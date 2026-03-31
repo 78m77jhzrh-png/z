@@ -33,13 +33,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const typingMsg = addMessage("Draco está pensando...", 'bot');
 
-        try {
-            // CAMBIO CLAVE: Ahora usamos la ruta de Vercel
+      try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ prompt: text })
             });
+
+            const data = await response.json();
+            
+            // 1. Verificamos si la respuesta es exitosa (Trae candidates)
+            if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+                typingMsg.innerText = data.candidates[0].content.parts[0].text;
+            } 
+            // 2. Si hay un error, intentamos leerlo de varias formas para evitar el "undefined"
+            else {
+                const errorTexto = data.error?.message || data.error || data.detalle || "Error desconocido";
+                typingMsg.innerText = "Nota de Draco: " + errorTexto;
+                console.error("Detalle del error:", data);
+            }
+
+        } catch (error) {
+            typingMsg.innerText = "Error: El túnel hacia Vercel falló.";
+            console.error(error);
+        }
 
             const data = await response.json();
             
