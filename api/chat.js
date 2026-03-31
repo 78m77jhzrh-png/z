@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // Solo permitir peticiones POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
@@ -8,8 +7,8 @@ export default async function handler(req, res) {
     const { prompt } = req.body;
     const API_KEY = process.env.examen;
 
-    // Usamos el fetch nativo de Vercel (Node 18+)
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+    // HEMOS ACTUALIZADO LA URL A LA VERSIÓN ESTABLE v1
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -19,11 +18,14 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     
-    // Enviamos la respuesta de vuelta al chat
+    // Si Google devuelve un error, lo enviamos para saber qué es
+    if (data.error) {
+      return res.status(data.error.code || 400).json(data);
+    }
+
     return res.status(200).json(data);
 
   } catch (error) {
-    console.error("Error en Draco:", error);
     return res.status(500).json({ error: error.message });
   }
 }
